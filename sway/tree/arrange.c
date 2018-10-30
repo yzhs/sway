@@ -131,25 +131,20 @@ static void apply_tall_layout(list_t *children, struct wlr_box *parent) {
 		return;
 	}
 	// Master window
+	struct sway_container *child = children->items[0];
+	size_t parent_offset = child->view ? 0 : container_titlebar_height();
+	container_remove_gaps(child);
+	child->x = parent->x;
+	child->y = parent->y + parent_offset;
+	child->height = parent->height - parent_offset;
 	if (children->length == 1) {
-		struct sway_container *child = children->items[0];
-		size_t parent_offset = child->view ? 0 : container_titlebar_height();
-		container_remove_gaps(child);
-		child->x = parent->x;
-		child->y = parent->y + parent_offset;
 		child->width = parent->width;
-		child->height = parent->height - parent_offset;
-		container_add_gaps(child);
-		return;
 	} else {
-		struct sway_container *child = children->items[0];
-		size_t parent_offset = child->view ? 0 : container_titlebar_height();
-		container_remove_gaps(child);
-		child->x = parent->x;
-		child->y = parent->y + parent_offset;
 		child->width = parent->width / 2;
-		child->height = parent->height - parent_offset;
-		container_add_gaps(child);
+	}
+	container_add_gaps(child);
+	if (children->length == 1) {
+		return;
 	}
 
 	// Remaining windows
