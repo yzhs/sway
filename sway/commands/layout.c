@@ -16,12 +16,14 @@ static enum sway_container_layout parse_layout_string(char *s) {
 		return L_TABBED;
 	} else if (strcasecmp(s, "stacking") == 0) {
 		return L_STACKED;
+	} else if (strcasecmp(s, "tall") == 0) {
+		return L_TALL;
 	}
 	return L_NONE;
 }
 
 static const char* expected_syntax =
-	"Expected 'layout default|tabbed|stacking|splitv|splith' or "
+	"Expected 'layout default|tabbed|stacking|splitv|splith|tall' or "
 	"'layout toggle [split|all]' or "
 	"'layout toggle [split|tabbed|stacking|splitv|splith] [split|tabbed|stacking|splitv|splith]...'";
 

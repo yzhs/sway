@@ -301,6 +301,28 @@ static struct sway_container *floating_container_at(double lx, double ly,
 	return NULL;
 }
 
+static struct sway_container *container_at_tall(struct sway_node *parent,
+		double lx,
+		double ly,
+		struct wlr_surface **surface,
+		double *sx,
+		double *sy) {
+	list_t *children = node_get_children(parent);
+	for (int i = 0; i < children->length; ++i) {
+		struct sway_container *child = children->items[i];
+		struct wlr_box box = {
+				.x = child->x,
+				.y = child->y,
+				.width = child->width,
+				.height = child->height,
+		};
+		if (wlr_box_contains_point(&box, lx, ly)) {
+			return tiling_container_at(&child->node, lx, ly, surface, sx, sy);
+		}
+	}
+	return NULL;
+}
+
 struct sway_container *tiling_container_at(struct sway_node *parent,
 		double lx, double ly,
 		struct wlr_surface **surface, double *sx, double *sy) {
@@ -319,6 +341,8 @@ struct sway_container *tiling_container_at(struct sway_node *parent,
 		return container_at_tabbed(parent, lx, ly, surface, sx, sy);
 	case L_STACKED:
 		return container_at_stacked(parent, lx, ly, surface, sx, sy);
+	case L_TALL:
+		return container_at_tall(parent, lx, ly, surface, sx, sy);
 	case L_NONE:
 		return NULL;
 	}
@@ -530,6 +554,9 @@ size_t container_build_representation(enum sway_container_layout layout,
 		break;
 	case L_STACKED:
 		lenient_strcat(buffer, "S[");
+		break;
+	case L_TALL:
+		lenient_strcat(buffer, "A[");
 		break;
 	case L_NONE:
 		lenient_strcat(buffer, "D[");

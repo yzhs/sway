@@ -27,6 +27,8 @@ static const char *layout_to_str(enum sway_container_layout layout) {
 		return "L_STACKED";
 	case L_TABBED:
 		return "L_TABBED";
+	case L_TALL:
+		return "L_TALL";
 	case L_NONE:
 		return "L_NONE";
 	}

@@ -126,6 +126,48 @@ static void apply_stacked_layout(list_t *children, struct wlr_box *parent) {
 	}
 }
 
+static void apply_tall_layout(list_t *children, struct wlr_box *parent) {
+	if (!children->length) {
+		return;
+	}
+	// Master window
+	if (children->length == 1) {
+		struct sway_container *child = children->items[0];
+		size_t parent_offset = child->view ? 0 : container_titlebar_height();
+		container_remove_gaps(child);
+		child->x = parent->x;
+		child->y = parent->y + parent_offset;
+		child->width = parent->width;
+		child->height = parent->height - parent_offset;
+		container_add_gaps(child);
+		return;
+	} else {
+		struct sway_container *child = children->items[0];
+		size_t parent_offset = child->view ? 0 : container_titlebar_height();
+		container_remove_gaps(child);
+		child->x = parent->x;
+		child->y = parent->y + parent_offset;
+		child->width = parent->width / 2;
+		child->height = parent->height - parent_offset;
+		container_add_gaps(child);
+	}
+
+	// Remaining windows
+	double per_child_height = parent->height / (children->length - 1);
+	for (int i = 1; i < children->length; ++i) {
+		struct sway_container *child = children->items[i];
+		size_t parent_offset =
+				child->view ? 0
+							: container_titlebar_height() * children->length;
+		container_remove_gaps(child);
+		child->x = parent->x + parent->width / 2;
+		child->y = parent->y + parent_offset + (i - 1) * per_child_height;
+		child->width = (parent->width + 1) / 2;
+		child->height = per_child_height - parent_offset;
+		container_add_gaps(child);
+	}
+}
+
 static void arrange_floating(list_t *floating) {
 	for (int i = 0; i < floating->length; ++i) {
 		struct sway_container *floater = floating->items[i];
@@ -148,6 +190,9 @@ static void arrange_children(list_t *children,
 		break;
 	case L_STACKED:
 		apply_stacked_layout(children, parent);
+		break;
+	case L_TALL:
+		apply_tall_layout(children, parent);
 		break;
 	case L_NONE:
 		apply_horiz_layout(children, parent);

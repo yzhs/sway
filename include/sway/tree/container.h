@@ -22,6 +22,7 @@ enum sway_container_layout {
 	L_VERT,
 	L_STACKED,
 	L_TABBED,
+	L_TALL,
 };
 
 enum sway_container_border {
