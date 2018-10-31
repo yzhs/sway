@@ -53,62 +53,6 @@ static void apply_horiz_layout(list_t *children, struct wlr_box *parent) {
 	}
 }
 
-static void apply_vert_layout(list_t *children, struct wlr_box *parent) {
-	if (!children->length) {
-		return;
-	}
-
-	// Calculate total height of children
-	double total_height = 0;
-	for (int i = 0; i < children->length; ++i) {
-		struct sway_container *child = children->items[i];
-		if (child->height <= 0) {
-			if (children->length > 1) {
-				child->height = parent->height / (children->length - 1);
-			} else {
-				child->height = parent->height;
-			}
-		}
-		container_remove_gaps(child);
-		total_height += child->height;
-	}
-	double scale = parent->height / total_height;
-
-	// Resize
-	wlr_log(WLR_DEBUG, "Arranging %p vertically", parent);
-	double child_y = parent->y;
-	for (int i = 0; i < children->length; ++i) {
-		struct sway_container *child = children->items[i];
-		child->x = parent->x;
-		child->y = child_y;
-		child->width = parent->width;
-		child->height = floor(child->height * scale);
-		child_y += child->height;
-
-		// Make last child use remaining height of parent
-		if (i == children->length - 1) {
-			child->height = parent->y + parent->height - child->y;
-		}
-		container_add_gaps(child);
-	}
-}
-
-static void apply_tabbed_layout(list_t *children, struct wlr_box *parent) {
-	if (!children->length) {
-		return;
-	}
-	for (int i = 0; i < children->length; ++i) {
-		struct sway_container *child = children->items[i];
-		size_t parent_offset = child->view ? 0 : container_titlebar_height();
-		container_remove_gaps(child);
-		child->x = parent->x;
-		child->y = parent->y + parent_offset;
-		child->width = parent->width;
-		child->height = parent->height - parent_offset;
-		container_add_gaps(child);
-	}
-}
-
 static void apply_stacked_layout(list_t *children, struct wlr_box *parent) {
 	if (!children->length) {
 		return;

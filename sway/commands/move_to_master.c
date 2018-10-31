@@ -140,28 +140,6 @@ static void container_swap(struct sway_container *con1,
 	}
 }
 
-static bool test_con_id(struct sway_container *container, void *con_id) {
-	return container->node.id == (size_t)con_id;
-}
-
-static bool test_id(struct sway_container *container, void *id) {
-#ifdef HAVE_XWAYLAND
-	xcb_window_t *wid = id;
-	return (container->view && container->view->type == SWAY_VIEW_XWAYLAND
-			&& container->view->wlr_xwayland_surface->window_id == *wid);
-#else
-	return false;
-#endif
-}
-
-static bool test_mark(struct sway_container *container, void *mark) {
-	if (container->view && container->view->marks->length) {
-		return !list_seq_find(container->view->marks,
-				(int (*)(const void *, const void *))strcmp, mark);
-	}
-	return false;
-}
-
 struct cmd_results *cmd_move_to_master(int argc, char **argv) {
 	struct cmd_results *error = NULL;
 
