@@ -146,6 +146,11 @@ struct cmd_results *cmd_move_to_master(int argc, char **argv) {
 	struct sway_container *current = config->handler_context.container;
 	struct sway_container *other = (struct sway_container *)container_get_current_siblings(current)->items[0];
 
+	if (current == other) {
+		wlr_log(WLR_DEBUG, "The container is already at the master position");
+		return cmd_results_new(CMD_SUCCESS, NULL, NULL);
+	}
+
 	if (!other) {
 		error = cmd_results_new(CMD_FAILURE, "move_to_master",
 				"Cannot find master");
