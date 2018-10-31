@@ -43,11 +43,10 @@ static struct sway_node *get_node_in_output_direction(
 	}
 	struct sway_container *container = NULL;
 
+	// TODO Figure out how to move focus around in the L_TALL layout.
 	if (ws->tiling->length > 0) {
 		switch (dir) {
 		case WLR_DIRECTION_LEFT:
-			container = seat_get_focus_inactive_tiling(seat, ws);
-			break;
 		case WLR_DIRECTION_RIGHT:
 			container = seat_get_focus_inactive_tiling(seat, ws);
 			break;
