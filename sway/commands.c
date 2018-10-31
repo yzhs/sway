@@ -126,6 +126,7 @@ static struct cmd_handler command_handlers[] = {
 	{ "layout", cmd_layout },
 	{ "mark", cmd_mark },
 	{ "move", cmd_move },
+	{ "move_to_master", cmd_move_to_master },
 	{ "nop", cmd_nop },
 	{ "opacity", cmd_opacity },
 	{ "reload", cmd_reload },

@@ -66,6 +66,7 @@ sway_sources = files(
 	'commands/mode.c',
 	'commands/mouse_warping.c',
 	'commands/move.c',
+	'commands/move_to_master.c',
 	'commands/no_focus.c',
 	'commands/nop.c',
 	'commands/output.c',
