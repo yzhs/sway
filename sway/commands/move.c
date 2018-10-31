@@ -83,11 +83,8 @@ static struct sway_output *output_in_direction(const char *direction_string,
 static bool is_parallel(enum sway_container_layout layout,
 		enum wlr_direction dir) {
 	switch (layout) {
-	case L_TABBED:
-	case L_HORIZ:
-		return dir == WLR_DIRECTION_LEFT || dir == WLR_DIRECTION_RIGHT;
 	case L_STACKED:
-	case L_VERT:
+	case L_TALL:
 		return dir == WLR_DIRECTION_UP || dir == WLR_DIRECTION_DOWN;
 	default:
 		return false;
@@ -257,32 +254,6 @@ static void container_move_to_container(struct sway_container *container,
 	}
 }
 
-/* Takes one child, sets it aside, wraps the rest of the children in a new
- * container, switches the layout of the workspace, and drops the child back in.
- * In other words, rejigger it. */
-static void workspace_rejigger(struct sway_workspace *ws,
-		struct sway_container *child, enum wlr_direction move_dir) {
-	if (!child->parent && ws->tiling->length == 1) {
-		ws->layout =
-			move_dir == WLR_DIRECTION_LEFT || move_dir == WLR_DIRECTION_RIGHT ?
-			L_HORIZ : L_VERT;
-		workspace_update_representation(ws);
-		return;
-	}
-	container_detach(child);
-	struct sway_container *new_parent = workspace_wrap_children(ws);
-
-	int index =
-		move_dir == WLR_DIRECTION_LEFT || move_dir == WLR_DIRECTION_UP ? 0 : 1;
-	workspace_insert_tiling(ws, child, index);
-	container_flatten(new_parent);
-	ws->layout =
-		move_dir == WLR_DIRECTION_LEFT || move_dir == WLR_DIRECTION_RIGHT ?
-		L_HORIZ : L_VERT;
-	workspace_update_representation(ws);
-	child->width = child->height = 0;
-}
-
 // Returns true if moved
 static bool container_move_in_direction(struct sway_container *container,
 		enum wlr_direction move_dir) {
@@ -356,11 +327,7 @@ static bool container_move_in_direction(struct sway_container *container,
 
 	// Maybe rejigger the workspace
 	struct sway_workspace *ws = container->workspace;
-	if (!is_parallel(ws->layout, move_dir)) {
-		workspace_rejigger(ws, container, move_dir);
-		return true;
-	} else if (ws->layout == L_TABBED || ws->layout == L_STACKED) {
-		workspace_rejigger(ws, container, move_dir);
+	if (!is_parallel(ws->layout, move_dir) || ws->layout == L_STACKED) {
 		return true;
 	}
 
@@ -823,7 +790,7 @@ static struct cmd_results *cmd_move_to_scratchpad(void) {
 	if (node->type == N_WORKSPACE) {
 		// Wrap the workspace's children in a container
 		con = workspace_wrap_children(ws);
-		ws->layout = L_HORIZ;
+		ws->layout = L_TALL;
 	}
 
 	// If the container is in a floating split container,

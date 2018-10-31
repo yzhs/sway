@@ -8,9 +8,9 @@ struct cmd_results *cmd_default_orientation(int argc, char **argv) {
 		return error;
 	}
 	if (strcasecmp(argv[0], "horizontal") == 0) {
-		config->default_orientation = L_HORIZ;
+		// Do nothing
 	} else if (strcasecmp(argv[0], "vertical") == 0) {
-		config->default_orientation = L_VERT;
+		// Do nothing
 	} else if (strcasecmp(argv[0], "auto") == 0) {
 		// Do nothing
 	} else {

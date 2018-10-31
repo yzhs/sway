@@ -26,7 +26,7 @@ struct cmd_results *cmd_fullscreen(int argc, char **argv) {
 	if (node->type == N_WORKSPACE) {
 		// Wrap the workspace's children in a container so we can fullscreen it
 		container = workspace_wrap_children(workspace);
-		workspace->layout = L_HORIZ;
+		workspace->layout = L_STACKED;
 		seat_set_focus_container(config->handler_context.seat, container);
 	}
 	bool enable = !container->is_fullscreen;

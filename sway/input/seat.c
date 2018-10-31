@@ -1086,9 +1086,8 @@ void seat_begin_resize_tiling(struct sway_seat *seat,
 
 static bool is_parallel(enum sway_container_layout layout,
 		enum wlr_edges edge) {
-	bool layout_is_horiz = layout == L_HORIZ || layout == L_TABBED;
 	bool edge_is_horiz = edge == WLR_EDGE_LEFT || edge == WLR_EDGE_RIGHT;
-	return layout_is_horiz == edge_is_horiz;
+	return !edge_is_horiz;
 }
 
 static void seat_end_move_tiling(struct sway_seat *seat) {
@@ -1111,15 +1110,13 @@ static void seat_end_move_tiling(struct sway_seat *seat) {
 		struct sway_container *target = target_node->sway_container;
 		enum sway_container_layout layout = container_parent_layout(target);
 		if (edge && !is_parallel(layout, edge)) {
-			enum sway_container_layout new_layout = edge == WLR_EDGE_TOP ||
-				edge == WLR_EDGE_BOTTOM ? L_VERT : L_HORIZ;
+			enum sway_container_layout new_layout = L_TALL;
 			container_split(target, new_layout);
 		}
 		container_add_sibling(target, con, after);
 	} else {
 		// Target is a workspace which requires splitting
-		enum sway_container_layout new_layout = edge == WLR_EDGE_TOP ||
-			edge == WLR_EDGE_BOTTOM ? L_VERT : L_HORIZ;
+		enum sway_container_layout new_layout = L_TALL;
 		workspace_split(new_ws, new_layout);
 		workspace_insert_tiling(new_ws, con, after);
 	}

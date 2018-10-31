@@ -190,40 +190,6 @@ static struct sway_container *surface_at_view(struct sway_container *con, double
 }
 
 /**
- * container_at for a container with layout L_TABBED.
- */
-static struct sway_container *container_at_tabbed(struct sway_node *parent,
-		double lx, double ly,
-		struct wlr_surface **surface, double *sx, double *sy) {
-	struct wlr_box box;
-	node_get_box(parent, &box);
-	if (ly < box.y || ly > box.y + box.height) {
-		return NULL;
-	}
-	struct sway_seat *seat = input_manager_current_seat();
-	list_t *children = node_get_children(parent);
-	if (!children->length) {
-		return NULL;
-	}
-
-	// Tab titles
-	int title_height = container_titlebar_height();
-	if (ly < box.y + title_height) {
-		int tab_width = box.width / children->length;
-		int child_index = (lx - box.x) / tab_width;
-		if (child_index >= children->length) {
-			child_index = children->length - 1;
-		}
-		struct sway_container *child = children->items[child_index];
-		return child;
-	}
-
-	// Surfaces
-	struct sway_node *current = seat_get_active_tiling_child(seat, parent);
-	return current ? tiling_container_at(current, lx, ly, surface, sx, sy) : NULL;
-}
-
-/**
  * container_at for a container with layout L_STACKED.
  */
 static struct sway_container *container_at_stacked(struct sway_node *parent,
@@ -248,28 +214,6 @@ static struct sway_container *container_at_stacked(struct sway_node *parent,
 	// Surfaces
 	struct sway_node *current = seat_get_active_tiling_child(seat, parent);
 	return current ? tiling_container_at(current, lx, ly, surface, sx, sy) : NULL;
-}
-
-/**
- * container_at for a container with layout L_HORIZ or L_VERT.
- */
-static struct sway_container *container_at_linear(struct sway_node *parent,
-		double lx, double ly,
-		struct wlr_surface **surface, double *sx, double *sy) {
-	list_t *children = node_get_children(parent);
-	for (int i = 0; i < children->length; ++i) {
-		struct sway_container *child = children->items[i];
-		struct wlr_box box = {
-			.x = child->x,
-			.y = child->y,
-			.width = child->width,
-			.height = child->height,
-		};
-		if (wlr_box_contains_point(&box, lx, ly)) {
-			return tiling_container_at(&child->node, lx, ly, surface, sx, sy);
-		}
-	}
-	return NULL;
 }
 
 static struct sway_container *floating_container_at(double lx, double ly,
@@ -334,11 +278,6 @@ struct sway_container *tiling_container_at(struct sway_node *parent,
 		return NULL;
 	}
 	switch (node_get_layout(parent)) {
-	case L_HORIZ:
-	case L_VERT:
-		return container_at_linear(parent, lx, ly, surface, sx, sy);
-	case L_TABBED:
-		return container_at_tabbed(parent, lx, ly, surface, sx, sy);
 	case L_STACKED:
 		return container_at_stacked(parent, lx, ly, surface, sx, sy);
 	case L_TALL:
@@ -543,20 +482,11 @@ size_t container_build_representation(enum sway_container_layout layout,
 		list_t *children, char *buffer) {
 	size_t len = 2;
 	switch (layout) {
-	case L_VERT:
-		lenient_strcat(buffer, "V[");
-		break;
-	case L_HORIZ:
-		lenient_strcat(buffer, "H[");
-		break;
-	case L_TABBED:
-		lenient_strcat(buffer, "T[");
-		break;
 	case L_STACKED:
 		lenient_strcat(buffer, "S[");
 		break;
 	case L_TALL:
-		lenient_strcat(buffer, "A[");
+		lenient_strcat(buffer, "T[");
 		break;
 	case L_NONE:
 		lenient_strcat(buffer, "D[");
@@ -1046,14 +976,14 @@ void container_add_gaps(struct sway_container *c) {
 		return;
 	}
 	// Linear containers don't have gaps because it'd create double gaps
-	if (!c->view && c->layout != L_TABBED && c->layout != L_STACKED) {
+	if (!c->view && c->layout != L_STACKED) {
 		return;
 	}
 	// Descendants of tabbed/stacked containers re-use the gaps of the container
 	struct sway_container *temp = c;
 	while (temp) {
 		enum sway_container_layout layout = container_parent_layout(temp);
-		if (layout == L_TABBED || layout == L_STACKED) {
+		if (layout == L_STACKED) {
 			return;
 		}
 		temp = temp->parent;

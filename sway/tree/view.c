@@ -178,7 +178,7 @@ bool view_is_only_visible(struct sway_view *view) {
 	struct sway_container *con = view->container;
 	while (con) {
 		enum sway_container_layout layout = container_parent_layout(con);
-		if (layout != L_TABBED && layout != L_STACKED) {
+		if (layout != L_STACKED) {
 			list_t *siblings = container_get_siblings(con);
 			if (siblings && siblings->length > 1) {
 				only_view = false;
@@ -250,10 +250,7 @@ void view_autoconfigure(struct sway_view *view) {
 	// title area. We have to offset the surface y by the height of the title,
 	// bar, and disable any top border because we'll always have the title bar.
 	enum sway_container_layout layout = container_parent_layout(con);
-	if (layout == L_TABBED && !container_is_floating(con)) {
-		y_offset = container_titlebar_height();
-		view->border_top = false;
-	} else if (layout == L_STACKED && !container_is_floating(con)) {
+	if (layout == L_STACKED && !container_is_floating(con)) {
 		list_t *siblings = container_get_siblings(con);
 		y_offset = container_titlebar_height() * siblings->length;
 		view->border_top = false;
@@ -1105,8 +1102,7 @@ bool view_is_visible(struct sway_view *view) {
 	struct sway_container *con = view->container;
 	while (con) {
 		enum sway_container_layout layout = container_parent_layout(con);
-		if ((layout == L_TABBED || layout == L_STACKED)
-				&& !container_is_floating(con)) {
+		if (layout == L_STACKED && !container_is_floating(con)) {
 			struct sway_node *parent = con->parent ?
 				&con->parent->node : &con->workspace->node;
 			if (seat_get_active_tiling_child(seat, parent) != &con->node) {

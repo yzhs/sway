@@ -46,23 +46,13 @@ static struct sway_node *get_node_in_output_direction(
 	if (ws->tiling->length > 0) {
 		switch (dir) {
 		case WLR_DIRECTION_LEFT:
-			if (ws->layout == L_HORIZ || ws->layout == L_TABBED) {
-				// get most right child of new output
-				container = ws->tiling->items[ws->tiling->length-1];
-			} else {
-				container = seat_get_focus_inactive_tiling(seat, ws);
-			}
+			container = seat_get_focus_inactive_tiling(seat, ws);
 			break;
 		case WLR_DIRECTION_RIGHT:
-			if (ws->layout == L_HORIZ || ws->layout == L_TABBED) {
-				// get most left child of new output
-				container = ws->tiling->items[0];
-			} else {
-				container = seat_get_focus_inactive_tiling(seat, ws);
-			}
+			container = seat_get_focus_inactive_tiling(seat, ws);
 			break;
 		case WLR_DIRECTION_UP:
-			if (ws->layout == L_VERT || ws->layout == L_STACKED) {
+			if (ws->layout == L_STACKED) {
 				// get most bottom child of new output
 				container = ws->tiling->items[ws->tiling->length-1];
 			} else {
@@ -70,7 +60,7 @@ static struct sway_node *get_node_in_output_direction(
 			}
 			break;
 		case WLR_DIRECTION_DOWN:
-			if (ws->layout == L_VERT || ws->layout == L_STACKED) {
+			if (ws->layout == L_STACKED) {
 				// get most top child of new output
 				container = ws->tiling->items[0];
 			} else {
@@ -111,12 +101,9 @@ static struct sway_node *node_get_in_direction(struct sway_container *container,
 		list_t *siblings = container_get_siblings(current);
 
 		if (dir == WLR_DIRECTION_LEFT || dir == WLR_DIRECTION_RIGHT) {
-			if (parent_layout == L_HORIZ || parent_layout == L_TABBED) {
-				can_move = true;
-				desired = idx + (dir == WLR_DIRECTION_LEFT ? -1 : 1);
-			}
+			// Do nothing
 		} else {
-			if (parent_layout == L_VERT || parent_layout == L_STACKED) {
+			if (parent_layout == L_STACKED) {
 				can_move = true;
 				desired = idx + (dir == WLR_DIRECTION_UP ? -1 : 1);
 			}

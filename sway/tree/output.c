@@ -373,8 +373,5 @@ enum sway_container_layout output_get_default_layout(
 	if (config->default_orientation != L_NONE) {
 		return config->default_orientation;
 	}
-	if (output->height > output->width) {
-		return L_VERT;
-	}
-	return L_HORIZ;
+	return L_TALL;
 }

@@ -8,13 +8,7 @@
 #include "log.h"
 
 static enum sway_container_layout parse_layout_string(char *s) {
-	if (strcasecmp(s, "splith") == 0) {
-		return L_HORIZ;
-	} else if (strcasecmp(s, "splitv") == 0) {
-		return L_VERT;
-	} else if (strcasecmp(s, "tabbed") == 0) {
-		return L_TABBED;
-	} else if (strcasecmp(s, "stacking") == 0) {
+	if (strcasecmp(s, "stacking") == 0) {
 		return L_STACKED;
 	} else if (strcasecmp(s, "tall") == 0) {
 		return L_TALL;
@@ -30,21 +24,20 @@ static const char* expected_syntax =
 static enum sway_container_layout get_layout_toggle(int argc, char **argv,
 		enum sway_container_layout layout,
 		enum sway_container_layout prev_split_layout) {
+	enum sway_container_layout new_layout = layout == L_TALL ? L_STACKED : L_TALL;
 	// "layout toggle"
 	if (argc == 1) {
-		return layout == L_HORIZ ? L_VERT : L_HORIZ;
+		return new_layout;
 	}
 
 	if (argc == 2) {
 		// "layout toggle split" (same as "layout toggle")
 		if (strcasecmp(argv[1], "split") == 0) {
-			return layout == L_HORIZ ? L_VERT : L_HORIZ;
+			return new_layout;
 		}
 		// "layout toggle all"
 		if (strcasecmp(argv[1], "all") == 0) {
-			return layout == L_HORIZ ? L_VERT :
-				layout == L_VERT ? L_STACKED :
-				layout == L_STACKED ? L_TABBED : L_HORIZ;
+			return new_layout;
 		}
 		return L_NONE;
 	}
@@ -53,8 +46,7 @@ static enum sway_container_layout get_layout_toggle(int argc, char **argv,
 	int curr = 1;
 	for (; curr < argc; curr++) {
 		parsed = parse_layout_string(argv[curr]);
-		if (parsed == layout || (strcmp(argv[curr], "split") == 0 &&
-				 (layout == L_VERT || layout == L_HORIZ))) {
+		if (parsed == layout) {
 			break;
 		}
 	}
@@ -68,8 +60,8 @@ static enum sway_container_layout get_layout_toggle(int argc, char **argv,
 			return parsed;
 		}
 		if (strcmp(argv[i], "split") == 0) {
-			return layout == L_HORIZ ? L_VERT :
-				layout == L_VERT ? L_HORIZ : prev_split_layout;
+			return layout == L_TALL ? L_STACKED :
+				layout == L_STACKED ? L_TALL : prev_split_layout;
 		}
 		// invalid layout strings are silently ignored
 	}
@@ -139,13 +131,13 @@ struct cmd_results *cmd_layout(int argc, char **argv) {
 	}
 	if (new_layout != old_layout) {
 		if (container) {
-			if (old_layout != L_TABBED && old_layout != L_STACKED) {
+			if (old_layout != L_STACKED) {
 				container->prev_split_layout = old_layout;
 			}
 			container->layout = new_layout;
 			container_update_representation(container);
 		} else {
-			if (old_layout != L_TABBED && old_layout != L_STACKED) {
+			if (old_layout != L_STACKED) {
 				workspace->prev_split_layout = old_layout;
 			}
 			workspace->layout = new_layout;

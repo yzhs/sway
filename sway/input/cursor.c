@@ -152,11 +152,11 @@ static bool edge_is_external(struct sway_container *cont, enum wlr_edges edge) {
 	switch (edge) {
 	case WLR_EDGE_TOP:
 	case WLR_EDGE_BOTTOM:
-		layout = L_VERT;
+		layout = L_TALL; // FIXME this is not correct!
 		break;
 	case WLR_EDGE_LEFT:
 	case WLR_EDGE_RIGHT:
-		layout = L_HORIZ;
+		layout = L_TALL; // FIXME this is not correct!
 		break;
 	case WLR_EDGE_NONE:
 		sway_assert(false, "Never reached");
@@ -314,14 +314,7 @@ static void handle_move_tiling_motion(struct sway_seat *seat,
 		struct wlr_box parent;
 		con->parent ? container_get_box(con->parent, &parent) :
 			workspace_get_box(con->workspace, &parent);
-		if (layout == L_HORIZ || layout == L_TABBED) {
-			if (cursor->cursor->y < parent.y + DROP_LAYOUT_BORDER) {
-				edge = WLR_EDGE_TOP;
-			} else if (cursor->cursor->y > parent.y + parent.height
-					- DROP_LAYOUT_BORDER) {
-				edge = WLR_EDGE_BOTTOM;
-			}
-		} else if (layout == L_VERT || layout == L_STACKED) {
+		if (layout == L_STACKED) {
 			if (cursor->cursor->x < parent.x + DROP_LAYOUT_BORDER) {
 				edge = WLR_EDGE_LEFT;
 			} else if (cursor->cursor->x > parent.x + parent.width
@@ -995,7 +988,7 @@ static void dispatch_cursor_axis(struct sway_cursor *cursor,
 	// Scrolling on a tabbed or stacked title bar
 	if (on_titlebar) {
 		enum sway_container_layout layout = container_parent_layout(cont);
-		if (layout == L_TABBED || layout == L_STACKED) {
+		if (layout == L_STACKED) {
 			struct sway_node *tabcontainer = node_get_parent(node);
 			struct sway_node *active =
 				seat_get_active_tiling_child(seat, tabcontainer);

@@ -174,15 +174,6 @@ static void arrange_children(list_t *children,
 		enum sway_container_layout layout, struct wlr_box *parent) {
 	// Calculate x, y, width and height of children
 	switch (layout) {
-	case L_HORIZ:
-		apply_horiz_layout(children, parent);
-		break;
-	case L_VERT:
-		apply_vert_layout(children, parent);
-		break;
-	case L_TABBED:
-		apply_tabbed_layout(children, parent);
-		break;
 	case L_STACKED:
 		apply_stacked_layout(children, parent);
 		break;

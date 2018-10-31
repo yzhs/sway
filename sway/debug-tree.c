@@ -19,14 +19,8 @@ struct sway_debug debug;
 
 static const char *layout_to_str(enum sway_container_layout layout) {
 	switch (layout) {
-	case L_HORIZ:
-		return "L_HORIZ";
-	case L_VERT:
-		return "L_VERT";
 	case L_STACKED:
 		return "L_STACKED";
-	case L_TABBED:
-		return "L_TABBED";
 	case L_TALL:
 		return "L_TALL";
 	case L_NONE:

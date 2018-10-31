@@ -164,10 +164,10 @@ static void container_recursive_resize(struct sway_container *container,
 	wlr_log(WLR_DEBUG, "Resizing %p with amount: %f", container, amount);
 	if (edge == WLR_EDGE_LEFT || edge == WLR_EDGE_RIGHT) {
 		container->width += amount;
-		layout_match = container->layout == L_HORIZ;
+		layout_match = container->layout == L_TALL; // FIXME this is wrong!
 	} else if (edge == WLR_EDGE_TOP || edge == WLR_EDGE_BOTTOM) {
 		container->height += amount;
-		layout_match = container->layout == L_VERT;
+		layout_match = container->layout == L_TALL; // FIXME this is wrong!
 	}
 	if (container->children) {
 		for (int i = 0; i < container->children->length; i++) {
@@ -186,8 +186,7 @@ static void resize_tiled(struct sway_container *parent, int amount,
 		return;
 	}
 
-	enum sway_container_layout parallel_layout =
-		normalize_axis(axis) == RESIZE_AXIS_HORIZONTAL ? L_HORIZ : L_VERT;
+	enum sway_container_layout parallel_layout = L_TALL;
 	int minor_weight = 0;
 	int major_weight = 0;
 	while (parent) {
@@ -466,7 +465,7 @@ static struct cmd_results *resize_set_tiled(struct sway_container *con,
 				width->unit == RESIZE_UNIT_DEFAULT) {
 			// Convert to px
 			struct sway_container *parent = con->parent;
-			while (parent && parent->layout != L_HORIZ) {
+			while (parent && parent->layout != L_TALL) {
 				parent = parent->parent;
 			}
 			if (parent) {
@@ -487,7 +486,7 @@ static struct cmd_results *resize_set_tiled(struct sway_container *con,
 				height->unit == RESIZE_UNIT_DEFAULT) {
 			// Convert to px
 			struct sway_container *parent = con->parent;
-			while (parent && parent->layout != L_VERT) {
+			while (parent && parent->layout != L_TALL) {
 				parent = parent->parent;
 			}
 			if (parent) {

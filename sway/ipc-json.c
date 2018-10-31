@@ -16,12 +16,6 @@
 
 static const char *ipc_json_layout_description(enum sway_container_layout l) {
 	switch (l) {
-	case L_VERT:
-		return "splitv";
-	case L_HORIZ:
-		return "splith";
-	case L_TABBED:
-		return "tabbed";
 	case L_STACKED:
 		return "stacked";
 	case L_TALL:
@@ -33,14 +27,6 @@ static const char *ipc_json_layout_description(enum sway_container_layout l) {
 }
 
 static const char *ipc_json_orientation_description(enum sway_container_layout l) {
-	if (l == L_VERT) {
-		return "vertical";
-	}
-
-	if (l == L_HORIZ) {
-		return "horizontal";
-	}
-
 	return "none";
 }
 
@@ -391,9 +377,9 @@ json_object *ipc_json_describe_node(struct sway_node *node) {
 			json_object_new_string(describe_container_border(B_NONE)));
 	json_object_object_add(object, "current_border_width", json_object_new_int(0));
 	json_object_object_add(object, "layout",
-			json_object_new_string(ipc_json_layout_description(L_HORIZ)));
+			json_object_new_string(ipc_json_layout_description(L_TALL)));
 	json_object_object_add(object, "orientation",
-			json_object_new_string(ipc_json_orientation_description(L_HORIZ)));
+			json_object_new_string(ipc_json_orientation_description(L_TALL)));
 	json_object_object_add(object, "percent", NULL);
 	json_object_object_add(object, "window_rect", ipc_json_create_empty_rect());
 	json_object_object_add(object, "deco_rect", ipc_json_create_empty_rect());

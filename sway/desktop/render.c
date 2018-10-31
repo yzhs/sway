@@ -308,17 +308,10 @@ static void render_view(struct sway_output *output, pixman_region32_t *damage,
 		render_rect(output->wlr_output, damage, &box, color);
 	}
 
-	list_t *siblings = container_get_current_siblings(con);
-	enum sway_container_layout layout =
-		container_current_parent_layout(con);
+	memcpy(&color, colors->child_border, sizeof(float) * 4);
+	premultiply_alpha(color, con->alpha);
 
 	if (state->border_right) {
-		if (siblings->length == 1 && layout == L_HORIZ) {
-			memcpy(&color, colors->indicator, sizeof(float) * 4);
-		} else {
-			memcpy(&color, colors->child_border, sizeof(float) * 4);
-		}
-		premultiply_alpha(color, con->alpha);
 		box.x = state->view_x + state->view_width;
 		box.y = state->view_y;
 		box.width = state->border_thickness;
@@ -328,12 +321,6 @@ static void render_view(struct sway_output *output, pixman_region32_t *damage,
 	}
 
 	if (state->border_bottom) {
-		if (siblings->length == 1 && layout == L_VERT) {
-			memcpy(&color, colors->indicator, sizeof(float) * 4);
-		} else {
-			memcpy(&color, colors->child_border, sizeof(float) * 4);
-		}
-		premultiply_alpha(color, con->alpha);
 		box.x = state->con_x;
 		box.y = state->view_y + state->view_height;
 		box.width = state->con_width;
@@ -362,10 +349,6 @@ static void render_titlebar(struct sway_output *output,
 	float color[4];
 	struct sway_container_state *state = &con->current;
 	float output_scale = output->wlr_output->scale;
-	enum sway_container_layout layout = container_current_parent_layout(con);
-	list_t *children = container_get_current_siblings(con);
-	bool is_last_child = children->length == 0 ||
-		children->items[children->length - 1] == con;
 	double output_x = output->wlr_output->lx;
 	double output_y = output->wlr_output->ly;
 
@@ -382,40 +365,12 @@ static void render_titlebar(struct sway_output *output,
 	// Single pixel bar below title
 	size_t left_offset = 0, right_offset = 0;
 	bool connects_sides = false;
-	if (layout == L_HORIZ || layout == L_VERT ||
-			(layout == L_STACKED && is_last_child)) {
-		if (con->view) {
-			left_offset = state->border_left * state->border_thickness;
-			right_offset = state->border_right * state->border_thickness;
-			connects_sides = true;
-		}
-	}
 	box.x = x + left_offset;
 	box.y = y + container_titlebar_height() - TITLEBAR_BORDER_THICKNESS;
 	box.width = width - left_offset - right_offset;
 	box.height = TITLEBAR_BORDER_THICKNESS;
 	scale_box(&box, output_scale);
 	render_rect(output->wlr_output, output_damage, &box, color);
-
-	if (layout == L_TABBED) {
-		// Single pixel left edge
-		box.x = x;
-		box.y = y + TITLEBAR_BORDER_THICKNESS;
-		box.width = TITLEBAR_BORDER_THICKNESS;
-		box.height =
-			container_titlebar_height() - TITLEBAR_BORDER_THICKNESS * 2;
-		scale_box(&box, output_scale);
-		render_rect(output->wlr_output, output_damage, &box, color);
-
-		// Single pixel right edge
-		box.x = x + width - TITLEBAR_BORDER_THICKNESS;
-		box.y = y + TITLEBAR_BORDER_THICKNESS;
-		box.width = TITLEBAR_BORDER_THICKNESS;
-		box.height =
-			container_titlebar_height() - TITLEBAR_BORDER_THICKNESS * 2;
-		scale_box(&box, output_scale);
-		render_rect(output->wlr_output, output_damage, &box, color);
-	}
 
 	size_t inner_width = width - TITLEBAR_H_PADDING * 2;
 	int bg_y = y + TITLEBAR_BORDER_THICKNESS;
@@ -530,7 +485,7 @@ static void render_titlebar(struct sway_output *output,
 	}
 
 	// Padding left of title
-	left_offset = (layout == L_TABBED) * TITLEBAR_BORDER_THICKNESS;
+	left_offset = 0;
 	box.x = x + left_offset;
 	box.y = y + TITLEBAR_BORDER_THICKNESS;
 	box.width = TITLEBAR_H_PADDING - left_offset;
@@ -540,7 +495,7 @@ static void render_titlebar(struct sway_output *output,
 	render_rect(output->wlr_output, output_damage, &box, color);
 
 	// Padding right of marks
-	right_offset = (layout == L_TABBED) * TITLEBAR_BORDER_THICKNESS;
+	right_offset = 0;
 	box.x = x + width - TITLEBAR_H_PADDING;
 	box.y = y + TITLEBAR_BORDER_THICKNESS;
 	box.width = TITLEBAR_H_PADDING - right_offset;
@@ -831,15 +786,10 @@ static void render_containers(struct sway_output *output,
 		pixman_region32_t *damage, struct parent_data *parent) {
 	switch (parent->layout) {
 	case L_NONE:
-	case L_HORIZ:
-	case L_VERT:
 		render_containers_linear(output, damage, parent);
 		break;
 	case L_STACKED:
 		render_containers_stacked(output, damage, parent);
-		break;
-	case L_TABBED:
-		render_containers_tabbed(output, damage, parent);
 		break;
 	case L_TALL:
 		render_containers_tall(output, damage, parent);

@@ -644,7 +644,7 @@ void workspace_add_gaps(struct sway_workspace *ws) {
 
 	ws->current_gaps = ws->gaps_outer;
 
-	if (ws->layout == L_TABBED || ws->layout == L_STACKED) {
+	if (ws->layout == L_STACKED) {
 		// We have to add inner gaps for this, because children of tabbed and
 		// stacked containers don't apply their own gaps - they assume the
 		// tabbed/stacked container is using gaps.

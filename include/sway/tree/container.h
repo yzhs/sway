@@ -18,10 +18,7 @@ struct sway_seat;
 
 enum sway_container_layout {
 	L_NONE,
-	L_HORIZ,
-	L_VERT,
 	L_STACKED,
-	L_TABBED,
 	L_TALL,
 };
 
