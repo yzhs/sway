@@ -14,7 +14,7 @@
 static const char* EXPECTED_SYNTAX =
 	"Expected 'swap container with id|con_id|mark <arg>'";
 
-static void swap_places(struct sway_container *con1,
+void swap_places(struct sway_container *con1,
 		struct sway_container *con2) {
 	struct sway_container *temp = malloc(sizeof(struct sway_container));
 	temp->x = con1->x;
@@ -51,7 +51,7 @@ static void swap_places(struct sway_container *con1,
 	free(temp);
 }
 
-static void swap_focus(struct sway_container *con1,
+void swap_focus(struct sway_container *con1,
 		struct sway_container *con2, struct sway_seat *seat,
 		struct sway_container *focus) {
 	if (focus == con1 || focus == con2) {
@@ -79,7 +79,7 @@ static void swap_focus(struct sway_container *con1,
 	}
 }
 
-static void container_swap(struct sway_container *con1,
+void container_swap(struct sway_container *con1,
 		struct sway_container *con2) {
 	if (!sway_assert(con1 && con2, "Cannot swap with nothing")) {
 		return;
